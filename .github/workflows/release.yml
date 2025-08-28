@@ -1,3 +1,4 @@
+---
 name: Release
 
 on:
@@ -12,126 +13,126 @@ permissions:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Generate Release Notes
-      id: release_notes
-      run: |
-        PREVIOUS_TAG=$(git tag --sort=-version:refname | head -n 2 | tail -n 1)
-        echo "## Changes since $PREVIOUS_TAG" > release_notes.md
-        echo "" >> release_notes.md
-        git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD >> release_notes.md
-        echo "" >> release_notes.md
-        echo "## Container Images" >> release_notes.md
-        echo "" >> release_notes.md
-        echo "### Multi-Architecture Support" >> release_notes.md
-        echo "- linux/amd64 - for x86_64 systems" >> release_notes.md
-        echo "- linux/arm64 - for Raspberry Pi 4/5 (64-bit)" >> release_notes.md
-        echo "- linux/arm/v7 - for Raspberry Pi 3/4 (32-bit)" >> release_notes.md
-        echo "" >> release_notes.md
-        echo "### Container Pull" >> release_notes.md
-        echo '```bash' >> release_notes.md
-        echo "docker pull ghcr.io/${{ github.repository }}:${{ github.ref_name }}" >> release_notes.md
-        echo '```' >> release_notes.md
-        echo "tag_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | head -n 2 | tail -n 1)
+          echo "## Changes since $PREVIOUS_TAG" > release_notes.md
+          echo "" >> release_notes.md
+          git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD >> release_notes.md
+          echo "" >> release_notes.md
+          echo "## Container Images" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### Multi-Architecture Support" >> release_notes.md
+          echo "- linux/amd64 - for x86_64 systems" >> release_notes.md
+          echo "- linux/arm64 - for Raspberry Pi 4/5 (64-bit)" >> release_notes.md
+          echo "- linux/arm/v7 - for Raspberry Pi 3/4 (32-bit)" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### Container Pull" >> release_notes.md
+          echo '```bash' >> release_notes.md
+          echo "docker pull ghcr.io/${{ github.repository }}:${{ github.ref_name }}" >> release_notes.md
+          echo '```' >> release_notes.md
+          echo "tag_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
-    - name: Create Release Assets
-      run: |
-        mkdir -p release-assets
-        cp docker-compose.yml release-assets/
-        cp pulse-daemon.conf release-assets/
-        cp pulse-default.pa release-assets/
-        cp bluetooth-setup.sh release-assets/
-        cp vban-bridge.sh release-assets/
-        cp start.sh release-assets/
+      - name: Create Release Assets
+        run: |
+          mkdir -p release-assets
+          cp docker-compose.yml release-assets/
+          cp pulse-daemon.conf release-assets/
+          cp pulse-default.pa release-assets/
+          cp bluetooth-setup.sh release-assets/
+          cp vban-bridge.sh release-assets/
+          cp start.sh release-assets/
 
-    - name: Create Quick Start Script
-      run: |
-        cat > release-assets/quick-start.sh << 'SCRIPT_END'
-        #!/bin/bash
-        set -e
-        echo "VBAN Bluetooth Speaker Setup"
-        echo "============================="
-        if ! command -v docker &> /dev/null; then
-            echo "Error: Docker is not installed!"
-            exit 1
-        fi
-        read -p "IP address of Voicemeeter computer: " TARGET_IP
-        if [ -z "$TARGET_IP" ]; then
-            echo "Error: IP address is required"
-            exit 1
-        fi
-        docker run -d \
-          --name vban-bluetooth-speaker \
-          --privileged \
-          --network host \
-          -e VBAN_TARGET_IP="$TARGET_IP" \
-          -e BT_DEVICE_NAME="VBAN-Speaker" \
-          -v /var/run/dbus:/var/run/dbus \
-          --restart unless-stopped \
-          ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-        echo "Setup completed!"
-        SCRIPT_END
-        chmod +x release-assets/quick-start.sh
+      - name: Create Quick Start Script
+        run: |
+          cat > release-assets/quick-start.sh << 'SCRIPT_END'
+          #!/bin/bash
+          set -e
+          echo "VBAN Bluetooth Speaker Setup"
+          echo "============================="
+          if ! command -v docker &> /dev/null; then
+              echo "Error: Docker is not installed!"
+              exit 1
+          fi
+          read -p "IP address of Voicemeeter computer: " TARGET_IP
+          if [ -z "$TARGET_IP" ]; then
+              echo "Error: IP address is required"
+              exit 1
+          fi
+          docker run -d \
+            --name vban-bluetooth-speaker \
+            --privileged \
+            --network host \
+            -e VBAN_TARGET_IP="$TARGET_IP" \
+            -e BT_DEVICE_NAME="VBAN-Speaker" \
+            -v /var/run/dbus:/var/run/dbus \
+            --restart unless-stopped \
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          echo "Setup completed!"
+          SCRIPT_END
+          chmod +x release-assets/quick-start.sh
 
-    - name: Create Release README
-      run: |
-        cat > release-assets/README.md << 'README_END'
-        # VBAN Bluetooth Audio Bridge - Release Package
-        
-        ## Quick Start
-        
-        1. Download release assets
-        2. Run ./quick-start.sh
-        3. Enter your Windows computer IP
-        4. Connect Bluetooth devices to "VBAN-Speaker"
-        
-        ## Manual Installation
-        
-        ```bash
-        docker run -d \
-          --name vban-bluetooth-speaker \
-          --privileged \
-          --network host \
-          -e VBAN_TARGET_IP="192.168.1.100" \
-          -e BT_DEVICE_NAME="VBAN-Speaker" \
-          -v /var/run/dbus:/var/run/dbus \
-          --restart unless-stopped \
-          ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-        ```
-        README_END
+      - name: Create Release README
+        run: |
+          cat > release-assets/README.md << 'README_END'
+          # VBAN Bluetooth Audio Bridge - Release Package
 
-    - name: Create Archive
-      run: |
-        tar -czf release-assets/vban-bluetooth-speaker-${{ github.ref_name }}.tar.gz -C release-assets .
+          ## Quick Start
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ steps.release_notes.outputs.tag_name }}
-        name: VBAN Bluetooth Speaker ${{ github.ref_name }}
-        body_path: release_notes.md
-        files: |
-          release-assets/vban-bluetooth-speaker-${{ github.ref_name }}.tar.gz
-          release-assets/quick-start.sh
-          release-assets/docker-compose.yml
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          1. Download release assets
+          2. Run ./quick-start.sh
+          3. Enter your Windows computer IP
+          4. Connect Bluetooth devices to "VBAN-Speaker"
+
+          ## Manual Installation
+
+          ```bash
+          docker run -d \
+            --name vban-bluetooth-speaker \
+            --privileged \
+            --network host \
+            -e VBAN_TARGET_IP="192.168.1.100" \
+            -e BT_DEVICE_NAME="VBAN-Speaker" \
+            -v /var/run/dbus:/var/run/dbus \
+            --restart unless-stopped \
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          ```
+          README_END
+
+      - name: Create Archive
+        run: |
+          tar -czf release-assets/vban-bluetooth-speaker-${{ github.ref_name }}.tar.gz -C release-assets .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release_notes.outputs.tag_name }}
+          name: VBAN Bluetooth Speaker ${{ github.ref_name }}
+          body_path: release_notes.md
+          files: |
+            release-assets/vban-bluetooth-speaker-${{ github.ref_name }}.tar.gz
+            release-assets/quick-start.sh
+            release-assets/docker-compose.yml
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   notify-release:
     runs-on: ubuntu-latest
     needs: create-release
     if: success()
-    
+
     steps:
-    - name: Send notification
-      run: |
-        echo "Release ${{ github.ref_name }} created successfully!"
-        echo "Container available at: ghcr.io/${{ github.repository }}:${{ github.ref_name }}"
+      - name: Send notification
+        run: |
+          echo "Release ${{ github.ref_name }} created successfully!"
+          echo "Container available at: ghcr.io/${{ github.repository }}:${{ github.ref_name }}"
