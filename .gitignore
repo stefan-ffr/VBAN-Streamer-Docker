@@ -1,0 +1,61 @@
+# .gitignore
+# VBAN Bluetooth Speaker Project
+
+# Docker
+docker-compose.override.yml
+docker-compose.local.yml
+.env.local
+
+# Logs
+*.log
+logs/
+bluetooth-logs/
+pulse-logs/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local configuration
+config.local
+settings.local.yml
+*.local.conf
+
+# Runtime files
+*.pid
+*.sock
+
+# Backup files  
+*.bak
+*.backup
+*.orig
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Container runtime
+.container-id
+.build-cache/
+
+# Test files
+test-output/
+coverage/
+*.test
+
+# Documentation builds
+docs/_build/
+site/

@@ -1,0 +1,81 @@
+# docker-compose.yml
+# VBAN Bluetooth Audio Bridge Setup (Bluetooth Speaker Modus)
+
+version: '3.8'
+
+services:
+  vban-bluetooth-speaker:
+    # Image von GitHub Container Registry (automatisch gebaut)
+    image: ghcr.io/BENUTZERNAME/REPOSITORY-NAME:latest  # Anpassen!
+    container_name: vban-bluetooth-speaker
+    
+    # Privilegierte Rechte für Bluetooth und Audio Hardware
+    privileged: true
+    
+    # Host-Netzwerk für direkten Hardware-Zugriff
+    network_mode: host
+    
+    # System-Volumes für Hardware-Integration
+    volumes:
+      - /var/run/dbus:/var/run/dbus:rw
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - pulse-data:/tmp
+      - bluetooth-data:/var/lib/bluetooth
+      - /dev:/dev
+    
+    # Hardware-Devices
+    devices:
+      - /dev/snd:/dev/snd
+      - /dev/input:/dev/input
+    
+    # Umgebungsvariablen für Bluetooth Speaker Konfiguration
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - PULSE_SERVER=unix:/tmp/pulse-socket
+      - VBAN_TARGET_IP=192.168.1.100        # IP des Computers mit Voicemeeter
+      - VBAN_PORT=6980
+      - VBAN_STREAM_NAME=RaspberryPi
+      - SAMPLE_RATE=44100
+      - BUFFER_SIZE=1024
+      - BT_DEVICE_NAME=VBAN-Speaker          # Name des Bluetooth-Lautsprechers
+      - BT_AUTO_ACCEPT=true                  # Automatisches Pairing
+      - AUDIO_BITRATE=320                    # Audio-Qualität (kbps)
+    
+    # Restart-Policy für Produktionsumgebung
+    restart: unless-stopped
+    
+    # Resource Limits (für Raspberry Pi optimiert)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    
+    # Health Check
+    healthcheck:
+      test: ["CMD-SHELL", "pulseaudio --check && bluetoothctl show | grep -q 'Powered: yes'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Logging-Konfiguration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
+# Persistente Volumes
+volumes:
+  pulse-data:
+    driver: local
+  bluetooth-data:
+    driver: local
+
+# Netzwerke (optional, da host mode verwendet wird)
+networks:
+  default:
+    driver: bridge

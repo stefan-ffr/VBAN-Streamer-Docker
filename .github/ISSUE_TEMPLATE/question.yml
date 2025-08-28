@@ -1,0 +1,47 @@
+name: ❓ Question/Support
+description: Stelle eine Frage oder bitte um Hilfe
+title: "[QUESTION] "
+labels: ["question", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Für allgemeine Fragen nutze bitte [GitHub Discussions](https://github.com/USERNAME/REPOSITORY/discussions).
+        Dieses Template ist für spezifische technische Fragen.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Deine Frage
+      description: Was möchtest du wissen?
+      placeholder: Stelle deine Frage so detailliert wie möglich...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Kontext
+      description: Zusätzliche Informationen zu deinem Setup
+      placeholder: |
+        - Hardware: Raspberry Pi 4
+        - Betriebssystem: Raspberry Pi OS
+        - Container Version: latest
+        - Verwendung: ...
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: Was hast du bereits versucht?
+      description: Welche Schritte hast du bereits unternommen?
+      placeholder: Beschreibe deine bisherigen Versuche...
+
+  - type: checkboxes
+    id: docs
+    attributes:
+      label: Dokumentation
+      options:
+        - label: Ich habe die README gelesen
+          required: true
+        - label: Ich habe nach ähnlichen Fragen gesucht
+          required: true

@@ -1,0 +1,54 @@
+name: 🚀 Feature Request
+description: Schlage eine neue Funktion oder Verbesserung vor
+title: "[FEATURE] "
+labels: ["enhancement", "feature-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Vielen Dank für deinen Feature-Vorschlag! Bitte beschreibe deine Idee so detailliert wie möglich.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem/Use Case
+      description: Welches Problem würde diese Funktion lösen?
+      placeholder: Beschreibe das Problem oder den Use Case...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Vorgeschlagene Lösung
+      description: Wie würdest du das Problem lösen?
+      placeholder: Beschreibe deine Lösungsidee...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen
+      description: Hast du andere Lösungsansätze in Betracht gezogen?
+      placeholder: Beschreibe alternative Ansätze...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorität
+      description: Wie wichtig ist diese Funktion für dich?
+      options:
+        - Low - Nice to have
+        - Medium - Würde helfen  
+        - High - Wichtig für meinen Use Case
+        - Critical - Blockiert meine Nutzung
+
+  - type: checkboxes
+    id: implementation
+    attributes:
+      label: Implementation
+      options:
+        - label: Ich wäre bereit bei der Umsetzung zu helfen
+        - label: Ich kann bei Tests/Feedback unterstützen
+        - label: Ich würde Dokumentation beitragen

@@ -1,0 +1,60 @@
+# .dockerignore
+# Verhindert dass unnötige Dateien in den Docker Build Context kopiert werden
+
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# GitHub
+.github/
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+
+# Documentation
+docs/
+*.md
+!setup.md
+
+# Docker files
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local config
+*.local
+.env*
+config.local*
+
+# Test files
+test/
+tests/
+*_test.go
+*_test.py
+coverage/
+
+# Build artifacts
+build/
+dist/
+target/

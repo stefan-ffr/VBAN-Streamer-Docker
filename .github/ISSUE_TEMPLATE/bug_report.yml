@@ -1,0 +1,228 @@
+# .github/ISSUE_TEMPLATE/bug_report.yml
+name: 🐛 Bug Report
+description: Melde einen Bug oder ein Problem
+title: "[BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Vielen Dank für das Melden eines Bugs! Bitte fülle das Formular so detailliert wie möglich aus.
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Plattform
+      description: Auf welcher Plattform tritt das Problem auf?
+      options:
+        - Raspberry Pi 4 (64-bit)
+        - Raspberry Pi 4 (32-bit)
+        - Raspberry Pi 3B+
+        - Andere ARM-Hardware
+        - x86_64 Linux
+        - Windows (WSL)
+        - macOS
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Container Version
+      description: Welche Version des Containers verwendest du?
+      placeholder: "z.B. v1.2.3, latest, main"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+      description: Was sollte normalerweise passieren?
+      placeholder: Beschreibe das erwartete Verhalten...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Aktuelles Verhalten
+      description: Was passiert stattdessen?
+      placeholder: Beschreibe das aktuelle Verhalten...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Schritte zur Reproduktion
+      description: Wie kann das Problem reproduziert werden?
+      placeholder: |
+        1. Starte Container mit ...
+        2. Verbinde Bluetooth-Gerät ...
+        3. Spiele Audio ab ...
+        4. Fehler tritt auf ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Container Logs
+      description: Kopiere relevante Container-Logs hier rein
+      placeholder: |
+        ```
+        docker logs vban-bluetooth-speaker
+        ```
+      render: shell
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Konfiguration
+      description: Teile deine docker-compose.yml oder Docker-Run-Befehl
+      placeholder: |
+        ```yaml
+        # docker-compose.yml Auszug oder Docker-Befehl
+        ```
+      render: yaml
+
+  - type: dropdown
+    id: bluetooth
+    attributes:
+      label: Bluetooth-Hardware
+      description: Welche Bluetooth-Hardware verwendest du?
+      options:
+        - Raspberry Pi integriert
+        - USB Bluetooth-Adapter
+        - Anderer Adapter
+        - Unbekannt
+
+  - type: input
+    id: bt_device
+    attributes:
+      label: Bluetooth-Gerät
+      description: Welches Gerät versuchst du zu verbinden?
+      placeholder: "z.B. Samsung Galaxy S23, iPhone 14, Windows PC"
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checkliste
+      description: Bitte bestätige folgende Punkte
+      options:
+        - label: Ich habe die Dokumentation gelesen
+          required: true
+        - label: Ich habe nach ähnlichen Issues gesucht
+          required: true
+        - label: Ich verwende die neueste Version
+          required: false
+
+---
+
+# .github/ISSUE_TEMPLATE/feature_request.yml
+name: 🚀 Feature Request
+description: Schlage eine neue Funktion oder Verbesserung vor
+title: "[FEATURE] "
+labels: ["enhancement", "feature-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Vielen Dank für deinen Feature-Vorschlag! Bitte beschreibe deine Idee so detailliert wie möglich.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem/Use Case
+      description: Welches Problem würde diese Funktion lösen?
+      placeholder: Beschreibe das Problem oder den Use Case...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Vorgeschlagene Lösung
+      description: Wie würdest du das Problem lösen?
+      placeholder: Beschreibe deine Lösungsidee...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen
+      description: Hast du andere Lösungsansätze in Betracht gezogen?
+      placeholder: Beschreibe alternative Ansätze...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorität
+      description: Wie wichtig ist diese Funktion für dich?
+      options:
+        - Low - Nice to have
+        - Medium - Würde helfen  
+        - High - Wichtig für meinen Use Case
+        - Critical - Blockiert meine Nutzung
+
+  - type: checkboxes
+    id: implementation
+    attributes:
+      label: Implementation
+      options:
+        - label: Ich wäre bereit bei der Umsetzung zu helfen
+        - label: Ich kann bei Tests/Feedback unterstützen
+        - label: Ich würde Dokumentation beitragen
+
+---
+
+# .github/ISSUE_TEMPLATE/question.yml  
+name: ❓ Question/Support
+description: Stelle eine Frage oder bitte um Hilfe
+title: "[QUESTION] "
+labels: ["question", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Für allgemeine Fragen nutze bitte [GitHub Discussions](https://github.com/USERNAME/REPOSITORY/discussions).
+        Dieses Template ist für spezifische technische Fragen.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Deine Frage
+      description: Was möchtest du wissen?
+      placeholder: Stelle deine Frage so detailliert wie möglich...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Kontext
+      description: Zusätzliche Informationen zu deinem Setup
+      placeholder: |
+        - Hardware: Raspberry Pi 4
+        - Betriebssystem: Raspberry Pi OS
+        - Container Version: latest
+        - Verwendung: ...
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: Was hast du bereits versucht?
+      description: Welche Schritte hast du bereits unternommen?
+      placeholder: Beschreibe deine bisherigen Versuche...
+
+  - type: checkboxes
+    id: docs
+    attributes:
+      label: Dokumentation
+      options:
+        - label: Ich habe die README gelesen
+          required: true
+        - label: Ich habe nach ähnlichen Fragen gesucht
+          required: true
