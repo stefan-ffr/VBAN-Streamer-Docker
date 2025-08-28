@@ -1,0 +1,58 @@
+name: YAML Lint
+
+on:
+  push:
+    paths:
+      - '.github/workflows/*.yml'
+      - '.github/workflows/*.yaml'
+      - 'docker-compose*.yml'
+      - '*.yml'
+      - '*.yaml'
+  pull_request:
+    paths:
+      - '.github/workflows/*.yml'
+      - '.github/workflows/*.yaml'
+      - 'docker-compose*.yml'
+      - '*.yml'
+      - '*.yaml'
+
+jobs:
+  yaml-lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+        
+    - name: Install yamllint
+      run: pip install yamllint
+      
+    - name: Lint YAML files
+      run: |
+        # Create yamllint config
+        cat > .yamllint << 'EOF'
+        extends: default
+        rules:
+          line-length:
+            max: 120
+          comments:
+            min-spaces-from-content: 1
+          indentation:
+            spaces: 2
+          truthy:
+            allowed-values: ['true', 'false', 'on', 'off', 'yes', 'no']
+        EOF
+        
+        # Run yamllint on workflow files
+        yamllint .github/workflows/
+        
+        # Run yamllint on docker-compose files
+        find . -name "docker-compose*.yml" -exec yamllint {} \;
+        
+        # Run yamllint on other YAML files
+        find . -name "*.yml" -not -path "./.github/workflows/*" -not -name "docker-compose*" -exec yamllint {} \;

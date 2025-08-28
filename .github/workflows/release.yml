@@ -1,6 +1,3 @@
-# .github/workflows/release.yml
-# Automatische Release-Erstellung mit Container-Images
-
 name: Release
 
 on:
@@ -25,7 +22,6 @@ jobs:
     - name: Generate Release Notes
       id: release_notes
       run: |
-        # Generate changelog since last tag
         PREVIOUS_TAG=$(git tag --sort=-version:refname | head -n 2 | tail -n 1)
         echo "## Changes since $PREVIOUS_TAG" > release_notes.md
         echo "" >> release_notes.md
@@ -34,125 +30,84 @@ jobs:
         echo "## Container Images" >> release_notes.md
         echo "" >> release_notes.md
         echo "### Multi-Architecture Support" >> release_notes.md
-        echo "- \`linux/amd64\` - für x86_64 Systeme" >> release_notes.md
-        echo "- \`linux/arm64\` - für Raspberry Pi 4/5 (64-bit)" >> release_notes.md
-        echo "- \`linux/arm/v7\` - für Raspberry Pi 3/4 (32-bit)" >> release_notes.md
+        echo "- linux/amd64 - for x86_64 systems" >> release_notes.md
+        echo "- linux/arm64 - for Raspberry Pi 4/5 (64-bit)" >> release_notes.md
+        echo "- linux/arm/v7 - for Raspberry Pi 3/4 (32-bit)" >> release_notes.md
         echo "" >> release_notes.md
         echo "### Container Pull" >> release_notes.md
-        echo "\`\`\`bash" >> release_notes.md
+        echo '```bash' >> release_notes.md
         echo "docker pull ghcr.io/${{ github.repository }}:${{ github.ref_name }}" >> release_notes.md
-        echo "\`\`\`" >> release_notes.md
-        
-        # Set output for release creation
+        echo '```' >> release_notes.md
         echo "tag_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
     - name: Create Release Assets
       run: |
-        # Create deployment package
         mkdir -p release-assets
-        
-        # Copy essential files
         cp docker-compose.yml release-assets/
         cp pulse-daemon.conf release-assets/
         cp pulse-default.pa release-assets/
         cp bluetooth-setup.sh release-assets/
         cp vban-bridge.sh release-assets/
         cp start.sh release-assets/
-        
-        # Create quick-start script
-        cat > release-assets/quick-start.sh << 'EOF'
-#!/bin/bash
-# VBAN Bluetooth Speaker Quick Start
-set -e
 
-echo "VBAN Bluetooth Speaker Setup"
-echo "============================="
-
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    echo "Error: Docker ist nicht installiert!"
-    echo "Installiere Docker: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh"
-    exit 1
-fi
-
-# Check if running on Raspberry Pi
-if ! grep -q "Raspberry Pi" /proc/cpuinfo 2>/dev/null; then
-    echo "Warning: Dieses Script ist für Raspberry Pi optimiert"
-fi
-
-# Get target IP
-read -p "IP-Adresse des Computers mit Voicemeeter Banana: " TARGET_IP
-if [ -z "$TARGET_IP" ]; then
-    echo "Error: IP-Adresse ist erforderlich"
-    exit 1
-fi
-
-# Create docker-compose with updated IP
-sed "s/VBAN_TARGET_IP=.*/VBAN_TARGET_IP=$TARGET_IP/" docker-compose.yml > docker-compose.local.yml
-
-# Start container
-echo "Starte VBAN Bluetooth Speaker Container..."
-docker run -d \
-  --name vban-bluetooth-speaker \
-  --privileged \
-  --network host \
-  -e VBAN_TARGET_IP="$TARGET_IP" \
-  -e BT_DEVICE_NAME="VBAN-Speaker" \
-  -v /var/run/dbus:/var/run/dbus \
-  --restart unless-stopped \
-  ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-
-echo ""
-echo "Setup abgeschlossen!"
-echo "Der Bluetooth-Lautsprecher 'VBAN-Speaker' ist jetzt verfügbar"
-echo "Verbinde deine Geräte und das Audio wird an $TARGET_IP weitergeleitet"
-echo ""
-echo "Status prüfen: docker logs vban-bluetooth-speaker"
-echo "Container stoppen: docker stop vban-bluetooth-speaker"
-EOF
+    - name: Create Quick Start Script
+      run: |
+        cat > release-assets/quick-start.sh << 'SCRIPT_END'
+        #!/bin/bash
+        set -e
+        echo "VBAN Bluetooth Speaker Setup"
+        echo "============================="
+        if ! command -v docker &> /dev/null; then
+            echo "Error: Docker is not installed!"
+            exit 1
+        fi
+        read -p "IP address of Voicemeeter computer: " TARGET_IP
+        if [ -z "$TARGET_IP" ]; then
+            echo "Error: IP address is required"
+            exit 1
+        fi
+        docker run -d \
+          --name vban-bluetooth-speaker \
+          --privileged \
+          --network host \
+          -e VBAN_TARGET_IP="$TARGET_IP" \
+          -e BT_DEVICE_NAME="VBAN-Speaker" \
+          -v /var/run/dbus:/var/run/dbus \
+          --restart unless-stopped \
+          ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+        echo "Setup completed!"
+        SCRIPT_END
         chmod +x release-assets/quick-start.sh
+
+    - name: Create Release README
+      run: |
+        cat > release-assets/README.md << 'README_END'
+        # VBAN Bluetooth Audio Bridge - Release Package
         
-        # Create README for release
-        cat > release-assets/README.md << 'EOF'
-# VBAN Bluetooth Audio Bridge - Release Package
-
-## Schnellstart
-
-1. Lade die Release-Assets herunter
-2. Führe `./quick-start.sh` aus
-3. Gib die IP-Adresse deines Windows-Computers ein
-4. Verbinde Bluetooth-Geräte mit "VBAN-Speaker"
-
-## Manuelle Installation
-
-```bash
-# Container starten
-docker run -d \
-  --name vban-bluetooth-speaker \
-  --privileged \
-  --network host \
-  -e VBAN_TARGET_IP="192.168.1.100" \
-  -e BT_DEVICE_NAME="VBAN-Speaker" \
-  -v /var/run/dbus:/var/run/dbus \
-  --restart unless-stopped \
-  ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-```
-
-## Voicemeeter Banana Setup
-
-1. Öffne Voicemeeter Banana
-2. Menu → VBAN → Incoming Stream hinzufügen:
-   - Name: RaspberryPi
-   - IP: [Raspberry Pi IP]
-   - Port: 6980
-
-## Support
-
-- GitHub Issues: https://github.com/${{ github.repository }}/issues
-- Dokumentation: https://github.com/${{ github.repository }}#readme
-EOF
+        ## Quick Start
         
-        # Create archive
+        1. Download release assets
+        2. Run ./quick-start.sh
+        3. Enter your Windows computer IP
+        4. Connect Bluetooth devices to "VBAN-Speaker"
+        
+        ## Manual Installation
+        
+        ```bash
+        docker run -d \
+          --name vban-bluetooth-speaker \
+          --privileged \
+          --network host \
+          -e VBAN_TARGET_IP="192.168.1.100" \
+          -e BT_DEVICE_NAME="VBAN-Speaker" \
+          -v /var/run/dbus:/var/run/dbus \
+          --restart unless-stopped \
+          ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+        ```
+        README_END
+
+    - name: Create Archive
+      run: |
         tar -czf release-assets/vban-bluetooth-speaker-${{ github.ref_name }}.tar.gz -C release-assets .
 
     - name: Create GitHub Release
@@ -178,5 +133,5 @@ EOF
     steps:
     - name: Send notification
       run: |
-        echo "Release ${{ github.ref_name }} wurde erfolgreich erstellt!"
-        echo "Container verfügbar unter: ghcr.io/${{ github.repository }}:${{ github.ref_name }}"
+        echo "Release ${{ github.ref_name }} created successfully!"
+        echo "Container available at: ghcr.io/${{ github.repository }}:${{ github.ref_name }}"
