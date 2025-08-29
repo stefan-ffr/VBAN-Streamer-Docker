@@ -28,14 +28,14 @@ docker run -d \
   -e BT_DEVICE_NAME="VBAN-Speaker" \
   -v /var/run/dbus:/var/run/dbus \
   --restart unless-stopped \
-  ghcr.io/USERNAME/REPOSITORY:latest
+  ghcr.io/stefan-ffr/vban-streamer-docker:latest
 ```
 
 ### Mit Docker Compose
 
 1. **Repository klonen oder docker-compose.yml herunterladen**
    ```bash
-   curl -O https://raw.githubusercontent.com/USERNAME/REPOSITORY/main/docker-compose.yml
+   curl -O https://raw.githubusercontent.com/stefan-ffr/vban-streamer-docker/main/docker-compose.yml
    ```
 
 2. **Konfiguration anpassen**
