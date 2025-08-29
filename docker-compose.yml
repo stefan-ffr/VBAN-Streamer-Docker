@@ -1,77 +1,13 @@
----
 version: '3.8'
 
 services:
-  vban-bluetooth-speaker:
+  vban:
     image: ghcr.io/stefan-ffr/vban-streamer-docker:latest
-    container_name: vban-bluetooth-speaker
-    build:
-      context: .
-      dockerfile: Dockerfile
-    
     privileged: true
     network_mode: host
-    
-    volumes:
-      - /var/run/dbus:/var/run/dbus:rw
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
-      - pulse-runtime:/var/run/pulse
-      - bluetooth-data:/var/lib/bluetooth
-    
     environment:
-      # VBAN/Netzwerk Konfiguration
-      - VBAN_TARGET_IP=192.168.1.100
-      - VBAN_PORT=6980
-      
-      # Audio-Einstellungen
-      - SAMPLE_RATE=44100
-      - CHANNELS=2
-      - FORMAT=s16le
-      - AUDIO_BITRATE=320
-      
-      # Bluetooth-Einstellungen
+      - VBAN_TARGET_IP=192.168.1.100  # Adjust as needed
       - BT_DEVICE_NAME=VBAN-Speaker
-      - BT_AUTO_ACCEPT=true
-      
-      # PulseAudio Netzwerk-Module
-      - PULSE_NETWORK_MODE=rtp          # rtp, tcp, tunnel, oder simple
-      - PULSE_SERVER_IP=${VBAN_TARGET_IP}
-      
-      # PulseAudio Optimierungen
-      - PULSE_LATENCY_MSEC=50
-      - PULSE_BUFFER_TIME=50000
-      - PULSE_PREBUF_TIME=25000
-      
-      # Debugging
-      - PULSE_LOG_LEVEL=info
-      - DEBUG_MODE=false
-    
+    volumes:
+      - /var/run/dbus:/var/run/dbus
     restart: unless-stopped
-    
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '1.0'
-        reservations:
-          memory: 256M
-    
-    healthcheck:
-      test: ["CMD-SHELL", "pulseaudio --check && bluetoothctl show | grep -q 'Powered: yes'"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "3"
-        compress: "true"
-
-volumes:
-  pulse-runtime:
-    driver: local
-  bluetooth-data:
-    driver: local
