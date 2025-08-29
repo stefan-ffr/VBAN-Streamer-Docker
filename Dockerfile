@@ -1,54 +1,36 @@
-# Dockerfile für VBAN Bluetooth Audio Bridge (Bluetooth Speaker Mode)
+# Dockerfile mit nativer PulseAudio Netzwerk-Audio Unterstützung
 FROM debian:bullseye-slim
 
-# Pakete installieren für Bluetooth Speaker Funktionalität
+# Installiere nur das Nötigste - PulseAudio hat alles eingebaut!
 RUN apt-get update && apt-get install -y \
     pulseaudio \
     pulseaudio-module-bluetooth \
+    pulseaudio-module-zeroconf \
+    pulseaudio-module-native-protocol-tcp \
     bluetooth \
     bluez \
     bluez-tools \
-    alsa-utils \
-    wget \
-    unzip \
     dbus \
-    expect \
-    gstreamer1.0-plugins-base \
-    gstreamer1.0-plugins-good \
-    gstreamer1.0-plugins-ugly \
-    gstreamer1.0-pulseaudio \
-    git \
-    build-essential \
-    libasound2-dev \
+    avahi-daemon \
+    alsa-utils \
+    netcat \
     && rm -rf /var/lib/apt/lists/*
-
-# VBAN Tools kompilieren (offizieller Linux-Support existiert nicht, nutze Alternative)
-WORKDIR /opt
-RUN git clone https://github.com/quiniouben/vban.git && \
-    cd vban && \
-    make && \
-    cp src/vban_emitter /usr/local/bin/ && \
-    cp src/vban_receptor /usr/local/bin/ && \
-    chmod +x /usr/local/bin/vban_* && \
-    cd .. && rm -rf vban
 
 # PulseAudio Konfiguration
 RUN mkdir -p /etc/pulse
 COPY pulse-daemon.conf /etc/pulse/daemon.conf
 COPY pulse-default.pa /etc/pulse/default.pa
 
-# Bluetooth Setup Script
+# Scripts kopieren
 COPY bluetooth-setup.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/bluetooth-setup.sh
-
-# VBAN Bridge Script
-COPY vban-bridge.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/vban-bridge.sh
-
-# Start Script
 COPY start.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/*.sh
+
+# PulseAudio TCP/UDP Module Config
+RUN echo "load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1;192.168.0.0/16;10.0.0.0/8" >> /etc/pulse/system.pa
+RUN echo "load-module module-rtp-send destination_ip=${VBAN_TARGET_IP:-192.168.1.100} port=6980 loop=1" >> /etc/pulse/system.pa
 
 EXPOSE 6980/udp
+EXPOSE 4713/tcp
 
 CMD ["/usr/local/bin/start.sh"]
