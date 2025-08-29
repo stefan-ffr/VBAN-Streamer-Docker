@@ -21,7 +21,8 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write   # 👈 needed for OIDC (attestation)
+      id-token: write        # for OIDC
+      attestations: write    # 👈 needed for provenance API
 
     steps:
       - name: Checkout repository
@@ -62,7 +63,7 @@ jobs:
             org.opencontainers.image.vendor=${{ github.repository_owner }}
 
       - name: Build and push Docker image
-        id: build-and-push   # 👈 gives us the digest output
+        id: build-and-push   # 👈 expose digest
         uses: docker/build-push-action@v5
         with:
           context: .
