@@ -52,10 +52,10 @@ jobs:
         run: |
           # Run yamllint on workflow files
           yamllint .github/workflows/
-          
+  
           # Run yamllint on docker-compose files
           find . -name "docker-compose*.yml" -exec yamllint {} \;
-          
+
           # Run yamllint on other YAML files
           find . -name "*.yml" -not -path "./.github/workflows/*" \
             -not -name "docker-compose*" -exec yamllint {} \;
