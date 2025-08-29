@@ -17,14 +17,20 @@ RUN apt-get update && apt-get install -y \
     gstreamer1.0-plugins-good \
     gstreamer1.0-plugins-ugly \
     gstreamer1.0-pulseaudio \
+    git \
+    build-essential \
+    libasound2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# VBAN Tools herunterladen (Linux Version)
+# VBAN Tools kompilieren (offizieller Linux-Support existiert nicht, nutze Alternative)
 WORKDIR /opt
-RUN wget -O vban.zip https://vb-audio.com/Voicemeeter/VBANCmdline_Linux.zip && \
-    unzip vban.zip && \
-    chmod +x vban_* && \
-    rm vban.zip
+RUN git clone https://github.com/quiniouben/vban.git && \
+    cd vban && \
+    make && \
+    cp src/vban_emitter /usr/local/bin/ && \
+    cp src/vban_receptor /usr/local/bin/ && \
+    chmod +x /usr/local/bin/vban_* && \
+    cd .. && rm -rf vban
 
 # PulseAudio Konfiguration
 RUN mkdir -p /etc/pulse
