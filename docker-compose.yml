@@ -3,7 +3,7 @@ version: '3.8'
 
 services:
   vban-bluetooth-speaker:
-    image: ghcr.io/USERNAME/REPOSITORY:latest
+    image: ghcr.io/stefan-ffr/vban-streamer-docker:latest
     container_name: vban-bluetooth-speaker
     build:
       context: .
