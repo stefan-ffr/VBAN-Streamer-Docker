@@ -22,7 +22,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -34,9 +33,8 @@ jobs:
       - name: Install yamllint
         run: pip install yamllint
 
-      - name: Lint YAML files
+      - name: Create yamllint config
         run: |
-          # Create yamllint config
           cat > .yamllint << 'EOF'
           extends: default
           rules:
@@ -50,11 +48,14 @@ jobs:
               allowed-values: ['true', 'false', 'on', 'off', 'yes', 'no']
           EOF
 
-        # Run yamllint on workflow files
-        yamllint .github/workflows/
-
-        # Run yamllint on docker-compose files
-        find . -name "docker-compose*.yml" -exec yamllint {} \;
-
-        # Run yamllint on other YAML files
-        find . -name "*.yml" -not -path "./.github/workflows/*" -not -name "docker-compose*" -exec yamllint {} \;
+      - name: Run yamllint
+        run: |
+          # Run yamllint on workflow files
+          yamllint .github/workflows/
+          
+          # Run yamllint on docker-compose files
+          find . -name "docker-compose*.yml" -exec yamllint {} \;
+          
+          # Run yamllint on other YAML files
+          find . -name "*.yml" -not -path "./.github/workflows/*" \
+            -not -name "docker-compose*" -exec yamllint {} \;
