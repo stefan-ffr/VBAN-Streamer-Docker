@@ -3,62 +3,66 @@ version: '3.8'
 
 services:
   vban-bluetooth-speaker:
-    # Image von GitHub Container Registry (automatisch gebaut)
-    image: ghcr.io/BENUTZERNAME/REPOSITORY-NAME:latest  # Anpassen!
+    image: ghcr.io/USERNAME/REPOSITORY:latest
     container_name: vban-bluetooth-speaker
-
-    # Privilegierte Rechte für Bluetooth und Audio Hardware
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
     privileged: true
-
-    # Host-Netzwerk für direkten Hardware-Zugriff
     network_mode: host
-
-    # System-Volumes für Hardware-Integration
+    
     volumes:
       - /var/run/dbus:/var/run/dbus:rw
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
-      - pulse-data:/tmp
+      - pulse-runtime:/var/run/pulse
       - bluetooth-data:/var/lib/bluetooth
-      - /dev:/dev
-
-    # Hardware-Devices
-    devices:
-      - /dev/snd:/dev/snd
-      - /dev/input:/dev/input
-
-    # Umgebungsvariablen für Bluetooth Speaker Konfiguration
+    
     environment:
-      - DISPLAY=${DISPLAY:-:0}
-      - PULSE_SERVER=unix:/tmp/pulse-socket
-      - VBAN_TARGET_IP=192.168.1.100        # IP des Computers mit Voicemeeter
+      # VBAN/Netzwerk Konfiguration
+      - VBAN_TARGET_IP=192.168.1.100
       - VBAN_PORT=6980
-      - VBAN_STREAM_NAME=RaspberryPi
+      
+      # Audio-Einstellungen
       - SAMPLE_RATE=44100
-      - BUFFER_SIZE=1024
-      - BT_DEVICE_NAME=VBAN-Speaker          # Name des Bluetooth-Lautsprechers
-      - BT_AUTO_ACCEPT=true                  # Automatisches Pairing
-      - AUDIO_BITRATE=320                    # Audio-Qualität (kbps)
-
-    # Restart-Policy für Produktionsumgebung
+      - CHANNELS=2
+      - FORMAT=s16le
+      - AUDIO_BITRATE=320
+      
+      # Bluetooth-Einstellungen
+      - BT_DEVICE_NAME=VBAN-Speaker
+      - BT_AUTO_ACCEPT=true
+      
+      # PulseAudio Netzwerk-Module
+      - PULSE_NETWORK_MODE=rtp          # rtp, tcp, tunnel, oder simple
+      - PULSE_SERVER_IP=${VBAN_TARGET_IP}
+      
+      # PulseAudio Optimierungen
+      - PULSE_LATENCY_MSEC=50
+      - PULSE_BUFFER_TIME=50000
+      - PULSE_PREBUF_TIME=25000
+      
+      # Debugging
+      - PULSE_LOG_LEVEL=info
+      - DEBUG_MODE=false
+    
     restart: unless-stopped
-
-    # Resource Limits (für Raspberry Pi optimiert)
+    
     deploy:
       resources:
         limits:
           memory: 512M
+          cpus: '1.0'
         reservations:
           memory: 256M
-
-    # Health Check
+    
     healthcheck:
       test: ["CMD-SHELL", "pulseaudio --check && bluetoothctl show | grep -q 'Powered: yes'"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-
-    # Logging-Konfiguration
+    
     logging:
       driver: "json-file"
       options:
@@ -66,14 +70,8 @@ services:
         max-file: "3"
         compress: "true"
 
-# Persistente Volumes
 volumes:
-  pulse-data:
+  pulse-runtime:
     driver: local
   bluetooth-data:
     driver: local
-
-# Netzwerke (optional, da host mode verwendet wird)
-networks:
-  default:
-    driver: bridge
