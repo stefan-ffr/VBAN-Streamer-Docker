@@ -18,7 +18,7 @@ fix_document_start() {
     local file="$1"
     if ! head -1 "$file" | grep -q "^---"; then
         echo "  Füge document-start zu $file hinzu"
-        sed -i '1i ---' "$file"
+        sed -i '1i---' "$file"
     fi
 }
 
@@ -35,10 +35,8 @@ fix_end_of_file() {
 fix_indentation() {
     local file="$1"
     echo "  Korrigiere Einrückung in $file"
-    # Verwende yq für saubere YAML-Formatierung (falls verfügbar)
-    if command -v yq > /dev/null 2>&1; then
-        yq eval '.' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
-    fi
+    # Korrigiere Tab zu Spaces
+    sed -i 's/\t/  /g' "$file"
 }
 
 # Liste der zu korrigierenden Dateien
@@ -46,6 +44,10 @@ yaml_files=(
     ".github/workflows/build-and-publish.yml"
     ".github/workflows/release.yml"
     ".github/workflows/yaml-lint.yml"
+    ".github/dependabot.yml"
+    ".github/ISSUE_TEMPLATE/bug_report.yml"
+    ".github/ISSUE_TEMPLATE/feature_request.yml"
+    ".github/ISSUE_TEMPLATE/question.yml"
     "docker-compose.yml"
     ".yamllint"
 )
@@ -58,6 +60,7 @@ for file in "${yaml_files[@]}"; do
         # Korrigiere häufige Probleme
         fix_trailing_spaces "$file"
         fix_document_start "$file"
+        fix_indentation "$file"
         fix_end_of_file "$file"
         
         echo "  ✅ $file korrigiert"
