@@ -112,7 +112,7 @@ jobs:
           tar -czf release-assets/vban-bluetooth-speaker-${{ github.ref_name }}.tar.gz -C release-assets .
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release_notes.outputs.tag_name }}
           name: VBAN Bluetooth Speaker ${{ github.ref_name }}
